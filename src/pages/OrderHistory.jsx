@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 function OrderHistory() {
   const [bookings, setBookings] = useState([]);
@@ -9,7 +9,7 @@ function OrderHistory() {
   const fetchBookings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/bookings', {
+      const res = await api.get('/bookings', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -29,7 +29,7 @@ function OrderHistory() {
   const handleCancel = async (bookingId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/bookings/${bookingId}`, {
+      await api.delete(`/bookings/${bookingId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

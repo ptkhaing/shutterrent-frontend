@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
 
 function AdminDashboard() {
@@ -23,13 +23,13 @@ function AdminDashboard() {
         if (!payload.isAdmin) return navigate("/");
 
         const [listingsRes, usersRes, bookingsRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/admin/listings", {
+          api.get("/admin/listings", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/admin/users", {
+          api.get("/admin/users", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/admin/bookings", {
+          api.get("/admin/bookings", {
             headers: { Authorization: `Bearer ${token}` },
           })
         ]);
@@ -50,7 +50,7 @@ function AdminDashboard() {
     if (!confirm("Are you sure you want to delete this listing?")) return;
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:5000/api/admin/listings/${id}`, {
+      await api.delete(`/admin/listings/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setListings(prev => prev.filter(l => l._id !== id));
@@ -63,7 +63,7 @@ function AdminDashboard() {
     if (!confirm("Are you sure you want to delete this user?")) return;
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, {
+      await api.delete(`/admin/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(prev => prev.filter(u => u._id !== id));
@@ -91,7 +91,7 @@ function AdminDashboard() {
     if (form.image) data.append("image", form.image);
 
     try {
-      const res = await axios.put(`http://localhost:5000/api/admin/listings/${id}`, data, {
+      const res = await api.put(`/admin/listings/${id}`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setListings(prev => prev.map(l => l._id === id ? res.data.listing : l));
@@ -110,7 +110,7 @@ function AdminDashboard() {
     if (form.image) data.append("image", form.image);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/listings", data, {
+      const res = await api.post("/listings", data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setListings(prev => [res.data, ...prev]);
@@ -124,7 +124,7 @@ function AdminDashboard() {
   const handleStatusChange = async (bookingId, newStatus) => {
     const token = localStorage.getItem("token");
     try {
-      await axios.put(`http://localhost:5000/api/admin/bookings/${bookingId}/status`, { status: newStatus }, {
+      await api.put(`/admin/bookings/${bookingId}/status`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -139,11 +139,11 @@ function AdminDashboard() {
   };
 
   return (
-<div className="p-4 sm:p-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold text-center mb-8">📊 Admin Dashboard</h1>
 
       <section className="mb-10">
-<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
           <h2 className="text-xl font-semibold">📷 Listings</h2>
           <button onClick={() => setCreating(true)} className="bg-green-600 text-white px-3 py-1 rounded">+ New Listing</button>
         </div>
@@ -159,7 +159,7 @@ function AdminDashboard() {
             </div>
           </div>
         )}
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {listings.map(listing => (
             <div key={listing._id} className="p-4 border rounded shadow">
               {editingId === listing._id ? (
@@ -175,7 +175,7 @@ function AdminDashboard() {
                 </>
               ) : (
                 <>
-                  <img src={`http://localhost:5000/${listing.image}`} alt={listing.title} className="h-40 w-full object-contain mb-2 rounded" />
+                  <img src={`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/${listing.image}`} alt={listing.title} className="h-40 w-full object-contain mb-2 rounded" />
                   <h3 className="font-bold">{listing.title}</h3>
                   <p>{listing.description}</p>
                   <p className="text-blue-600 font-semibold">{listing.pricePerDay.toLocaleString()}Ks / day</p>
@@ -200,7 +200,7 @@ function AdminDashboard() {
                 <p className="font-medium">{user.name} ({user.email})</p>
                 <p className="text-sm text-gray-600">{user.isAdmin ? 'Admin' : 'User'}</p>
               </div>
-<div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
                 <button
                   onClick={() => {
                     setSelectedUser(user);
@@ -222,25 +222,23 @@ function AdminDashboard() {
         </ul>
       </section>
 
-{showUserModal && selectedUser && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-    <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl text-center">
-      <h2 className="text-xl font-bold text-blue-700 mb-4">👤 User Details</h2>
-      
-<img
-  src={selectedUser.profileImage
-    ? `http://localhost:5000/uploads/${selectedUser.profileImage}`
-    : "https://via.placeholder.com/96"}
-  alt="Profile"
-  className="w-24 h-24 mx-auto mb-4 rounded-full object-cover border shadow"
-/>
+      {showUserModal && selectedUser && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl text-center">
+            <h2 className="text-xl font-bold text-blue-700 mb-4">👤 User Details</h2>
+            <img
+              src={selectedUser.profileImage
+                ? `${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/uploads/${selectedUser.profileImage}`
+                : "https://via.placeholder.com/96"}
+              alt="Profile"
+              className="w-24 h-24 mx-auto mb-4 rounded-full object-cover border shadow"
+            />
             <p><strong>Name:</strong> {selectedUser.name}</p>
             <p><strong>Email:</strong> {selectedUser.email}</p>
             <p><strong>Phone:</strong> {selectedUser.phone || "N/A"}</p>
             <p><strong>Address:</strong> {selectedUser.address || "N/A"}</p>
             <p><strong>Joined:</strong> {new Date(selectedUser.createdAt).toLocaleString()}</p>
             <p><strong>Role:</strong> {selectedUser.isAdmin ? "Admin" : "User"}</p>
-
             <div className="mt-4 text-right">
               <button
                 onClick={() => setShowUserModal(false)}
@@ -253,37 +251,35 @@ function AdminDashboard() {
         </div>
       )}
 
-<section className="mt-10">
-  <h2 className="text-xl font-semibold mb-4">📅 Bookings</h2>
-  <ul className="space-y-4">
-    {bookings.map(booking => (
-      <li key={booking._id} className="border p-4 rounded shadow">
-        <p><strong>User:</strong> {booking.user?.name} ({booking.user?.email})</p>
-        <p><strong>Listing:</strong> {booking.listing?.title}</p>
-        <p><strong>Start:</strong> {new Date(booking.startDate).toLocaleDateString()}</p>
-        <p><strong>End:</strong> {new Date(booking.endDate).toLocaleDateString()}</p>
-        <p><strong>Payment:</strong> Cash on Delivery</p> {/* ← ✅ ADD THIS LINE */}
-        <p className="text-sm text-gray-500">Booked at: {new Date(booking.createdAt).toLocaleString()}</p>
-
-        <p className={`mt-1 font-semibold ${booking.status === 'Confirmed' ? 'text-green-600' : 'text-red-600'}`}>
-          Status: {booking.status}
-        </p>
-
-        <div className="flex items-center gap-2 mt-2">
-          <label className="font-semibold">Change Status:</label>
-          <select
-            value={booking.status}
-            onChange={(e) => handleStatusChange(booking._id, e.target.value)}
-            className="border rounded px-2 py-1"
-          >
-            <option value="Pending">Pending</option>
-            <option value="Confirmed">Confirmed</option>
-          </select>
-        </div>
-      </li>
-    ))}
-  </ul>
-</section>
+      <section className="mt-10">
+        <h2 className="text-xl font-semibold mb-4">📅 Bookings</h2>
+        <ul className="space-y-4">
+          {bookings.map(booking => (
+            <li key={booking._id} className="border p-4 rounded shadow">
+              <p><strong>User:</strong> {booking.user?.name} ({booking.user?.email})</p>
+              <p><strong>Listing:</strong> {booking.listing?.title}</p>
+              <p><strong>Start:</strong> {new Date(booking.startDate).toLocaleDateString()}</p>
+              <p><strong>End:</strong> {new Date(booking.endDate).toLocaleDateString()}</p>
+              <p><strong>Payment:</strong> Cash on Delivery</p>
+              <p className="text-sm text-gray-500">Booked at: {new Date(booking.createdAt).toLocaleString()}</p>
+              <p className={`mt-1 font-semibold ${booking.status === 'Confirmed' ? 'text-green-600' : 'text-red-600'}`}>
+                Status: {booking.status}
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <label className="font-semibold">Change Status:</label>
+                <select
+                  value={booking.status}
+                  onChange={(e) => handleStatusChange(booking._id, e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Confirmed">Confirmed</option>
+                </select>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

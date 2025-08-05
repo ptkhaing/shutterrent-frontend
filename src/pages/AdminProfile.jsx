@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 
 function AdminProfile() {
   const [admin, setAdmin] = useState(null);
@@ -19,15 +19,21 @@ function AdminProfile() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    const fetchAdmin = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-    axios
-      .get("http://localhost:5000/api/user/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setAdmin(res.data))
-      .catch((err) => console.error("Error fetching admin profile", err));
+      try {
+        const res = await api.get("/user/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAdmin(res.data);
+      } catch (err) {
+        console.error("Error fetching admin profile", err);
+      }
+    };
+
+    fetchAdmin();
   }, []);
 
   const handleImageSave = async () => {
@@ -36,7 +42,7 @@ function AdminProfile() {
     formData.append("profileImage", profileImage);
 
     try {
-      const res = await axios.put("http://localhost:5000/api/user/update", formData, {
+      const res = await api.put("/user/update", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdmin(res.data);
@@ -56,7 +62,7 @@ function AdminProfile() {
     }
 
     try {
-      await axios.put("http://localhost:5000/api/auth/change-password", passwords, {
+      await api.put("/auth/change-password", passwords, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
@@ -76,7 +82,7 @@ function AdminProfile() {
 
         {admin.profileImage ? (
           <img
-            src={`http://localhost:5000/uploads/${admin.profileImage}`}
+            src={`${import.meta.env.VITE_API_BASE_URL.replace("/api", "")}/uploads/${admin.profileImage}`}
             alt="Profile"
             className="w-28 h-28 mx-auto rounded-full object-cover shadow-md"
           />
@@ -89,7 +95,7 @@ function AdminProfile() {
         <p className="mt-4 text-lg font-semibold">👤 {admin.name}</p>
         <p className="text-gray-600">📧 {admin.email}</p>
 
-        {editingImage ? (
+        {editingImage && (
           <div className="mt-4 space-y-2">
             <input
               type="file"
@@ -123,7 +129,7 @@ function AdminProfile() {
               </button>
             </div>
           </div>
-        ) : null}
+        )}
 
         <div className="flex justify-center gap-4 mt-4">
           <button

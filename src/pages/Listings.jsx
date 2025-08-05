@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../api';
 
 function Listings() {
   const [listings, setListings] = useState([]);
@@ -15,7 +15,7 @@ function Listings() {
 
   const fetchCategories = async () => {
     try {
-const res = await axios.get('https://shutterrent-backend.onrender.com/api/listings/categories');
+      const res = await api.get('/listings/categories');
       setCategories(res.data);
     } catch (err) {
       console.log('Failed to fetch categories');
@@ -24,7 +24,7 @@ const res = await axios.get('https://shutterrent-backend.onrender.com/api/listin
 
   const fetchListings = async (category = '') => {
     try {
-const res = await axios.get('https://shutterrent-backend.onrender.com/api/listings', {
+      const res = await api.get('/listings', {
         params: category ? { category } : {},
       });
       setListings(res.data);
@@ -73,7 +73,7 @@ const res = await axios.get('https://shutterrent-backend.onrender.com/api/listin
         {listings.map((listing) => (
           <div key={listing._id} className="bg-white p-4 rounded shadow hover:shadow-lg">
             <img
-src={`https://shutterrent-backend.onrender.com/${listing.image}`}
+src={`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/${listing.image}`}
               alt={listing.title}
               className="w-full h-48 object-contain rounded mb-4"
             />

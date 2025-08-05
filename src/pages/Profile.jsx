@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -16,7 +16,7 @@ function Profile() {
 
     const fetchData = async () => {
       try {
-        const userRes = await axios.get('http://localhost:5000/api/user/profile', {
+        const userRes = await api.get('/user/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(userRes.data);
@@ -47,7 +47,7 @@ function Profile() {
     }
 
     try {
-      await axios.put("http://localhost:5000/api/auth/change-password", passwords, {
+      await api.put('/auth/change-password', passwords, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowPasswordForm(false);
@@ -70,8 +70,8 @@ function Profile() {
     if (form.profileImage) data.append("profileImage", form.profileImage);
 
     try {
-      const res = await axios.put("http://localhost:5000/api/user/update", data, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await api.put('/user/update', data, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data);
       setEditing(false);
@@ -89,7 +89,7 @@ function Profile() {
         <div className="flex flex-col items-center">
           {user.profileImage ? (
             <img
-              src={`http://localhost:5000/uploads/${user.profileImage}`}
+              src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${user.profileImage}`}
               alt="Profile"
               className="w-28 h-28 rounded-full object-cover shadow-md"
             />
@@ -128,57 +128,58 @@ function Profile() {
                 <button onClick={() => setEditing(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">Edit Profile</button>
                 <button onClick={() => setShowPasswordForm(!showPasswordForm)} className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded shadow">Change Password</button>
               </div>
+
               {successMessage && (
-  <p className={`mt-2 text-sm font-medium ${successMessage.includes("✅") ? "text-green-600" : "text-red-600"}`}>
-    {successMessage}
-  </p>
-)}
+                <p className={`mt-2 text-sm font-medium ${successMessage.includes("✅") ? "text-green-600" : "text-red-600"}`}>
+                  {successMessage}
+                </p>
+              )}
 
-{showPasswordForm && (
-  <div className="mt-4 w-full space-y-2">
-    {["currentPassword", "newPassword", "confirmPassword"].map((field, i) => {
-      const label = ["Current Password", "New Password", "Confirm New Password"][i];
-      const key = ["current", "new", "confirm"][i];
-      return (
-<div className="relative" key={key}>
-  <label className="block text-sm font-medium mb-1">{label}</label>
-  <input
-    type={showPassword[key] ? "text" : "password"}
-    placeholder={label}
-    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none pr-16"
-    value={passwords[field]}
-    onChange={(e) => setPasswords({ ...passwords, [field]: e.target.value })}
-  />
-  <button
-    type="button"
-    onClick={() => togglePassword(key)}
-    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-600 text-sm hover:underline"
-  >
-    {showPassword[key] ? "Hide" : "Show"}
-  </button>
-</div>
-      );
-    })}
+              {showPasswordForm && (
+                <div className="mt-4 w-full space-y-2">
+                  {["currentPassword", "newPassword", "confirmPassword"].map((field, i) => {
+                    const label = ["Current Password", "New Password", "Confirm New Password"][i];
+                    const key = ["current", "new", "confirm"][i];
+                    return (
+                      <div className="relative" key={key}>
+                        <label className="block text-sm font-medium mb-1">{label}</label>
+                        <input
+                          type={showPassword[key] ? "text" : "password"}
+                          placeholder={label}
+                          className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none pr-16"
+                          value={passwords[field]}
+                          onChange={(e) => setPasswords({ ...passwords, [field]: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => togglePassword(key)}
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-600 text-sm hover:underline"
+                        >
+                          {showPassword[key] ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                    );
+                  })}
 
-    <div className="flex gap-4 pt-2">
-      <button
-        onClick={handlePasswordChange}
-        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-      >
-        Save Password
-      </button>
-      <button
-        onClick={() => {
-          setShowPasswordForm(false);
-          setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
-        }}
-        className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-)}
+                  <div className="flex gap-4 pt-2">
+                    <button
+                      onClick={handlePasswordChange}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                    >
+                      Save Password
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowPasswordForm(false);
+                        setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                      }}
+                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

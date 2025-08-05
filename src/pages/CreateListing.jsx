@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import api from '../api'
 
 function CreateListing() {
   const [title, setTitle] = useState('')
@@ -22,16 +22,17 @@ function CreateListing() {
       if (image) formData.append('image', image)
 
       const token = localStorage.getItem('token')
-      await axios.post('http://localhost:5000/api/listings', formData, {
+      await api.post('/listings', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       })
 
-      navigate('/listings')
+      navigate('/browse') // Changed to /browse as per updated nav
     } catch (err) {
-      setError('Failed to create listing. Make sure you are logged in.')
+      console.error(err)
+      setError('❌ Failed to create listing. Make sure you are logged in.')
     }
   }
 
@@ -61,7 +62,7 @@ function CreateListing() {
 
         <input
           type="number"
-          placeholder="Price per day (USD)"
+          placeholder="Price per day (Ks)"
           className="w-full border p-2 rounded"
           value={pricePerDay}
           onChange={(e) => setPricePerDay(e.target.value)}

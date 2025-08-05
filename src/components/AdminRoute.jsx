@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 
 function AdminRoute({ children }) {
   const [authState, setAuthState] = useState({
@@ -17,7 +17,7 @@ function AdminRoute({ children }) {
       }
 
       try {
-        const res = await axios.get("http://localhost:5000/api/user/profile", {
+        const res = await api.get("/user/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const isAdmin = res.data.isAdmin === true;
