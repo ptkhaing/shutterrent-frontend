@@ -88,11 +88,11 @@ function Profile() {
         {/* Avatar */}
         <div className="flex flex-col items-center">
           {user.profileImage ? (
-            <img
-              src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${user.profileImage}`}
-              alt="Profile"
-              className="w-28 h-28 rounded-full object-cover shadow-md"
-            />
+<img
+  src={`${import.meta.env.VITE_API_BASE_URL.replace('/api', '')}/uploads/${user.profileImage}`}
+  alt="Profile"
+  className="w-28 h-28 rounded-full object-cover shadow-md"
+/>
           ) : (
             <div className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center text-3xl font-bold text-gray-700 shadow-md">
               {user.name?.slice(0, 2).toUpperCase()}
